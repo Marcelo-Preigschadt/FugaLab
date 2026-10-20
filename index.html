@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#0b111c"><meta name="description" content="Um laboratório, um robô e três linhas de código. Modifique a programação dentro do jogo para encontrar a saída.">
+  <title>FugaLab — A saída está no código</title>
+  <link rel="icon" href="./assets/icon.svg" type="image/svg+xml"><link rel="stylesheet" href="./style.css?v=1">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="./" aria-label="FugaLab início"><span class="brand-symbol">⌘</span>FUGA<span>LAB</span><small>EXPERIMENTO 001</small></a>
+    <div class="exhibit-label"><i></i> FEIRA DAS PROFISSÕES <span>/</span> COMPUTAÇÃO</div>
+    <nav aria-label="Controles da estação"><button id="sound" aria-pressed="false">Som desligado</button><button id="fullscreen">Tela cheia ↗</button><button id="newVisitor" class="quiet">Novo visitante</button></nav>
+  </header>
+  <main class="workspace">
+    <section class="play-column" aria-label="Jogo Fuga do Laboratório">
+      <div class="mission-heading"><div><span class="eyebrow">SUA MISSÃO <b id="stageNumber">01 / 03</b></span><h1 id="missionTitle">Um salto além do padrão.</h1><p id="missionText">O robô não alcança a plataforma. Altere a força do pulo e ative o núcleo no alto.</p></div><div class="mission-steps" aria-label="Progresso"><span id="step1" class="active">01</span><i></i><span id="step2">02</span><i></i><span id="step3">03</span></div></div>
+      <div class="game-frame" id="gameFrame">
+        <div class="view-label"><span class="record-dot"></span> LABORATÓRIO AO VIVO <span id="roomName">SALA 01 · PROPULSÃO</span></div>
+        <canvas id="game" tabindex="0" aria-label="Use as setas ou A e D para andar e espaço para pular. Edite o código no terminal para mudar o jogo."></canvas>
+        <div class="frame-corners" aria-hidden="true"></div>
+        <div id="stageToast" class="stage-toast" hidden role="status"><span>ACESSO LIBERADO</span><strong id="stageToastText"></strong></div>
+        <div id="editingBadge" class="editing-badge" hidden>Ⅱ SIMULAÇÃO PAUSADA · EDITANDO CÓDIGO</div>
+        <section id="intro" class="overlay intro"><div class="intro-card"><span class="eyebrow">UMA EXPERIÊNCIA DE PROGRAMAÇÃO</span><h2>A saída está<br>no <em>código.</em></h2><p>Ajude o robô a escapar.<br>Mude três instruções. Veja tudo acontecer.</p><button id="start" class="primary">Iniciar experimento <span>→</span></button><div class="intro-controls"><kbd>←</kbd><kbd>→</kbd> mover <span>·</span> <kbd>ESPAÇO</kbd> pular</div></div></section>
+        <section id="pause" class="overlay" hidden><div class="modal-card"><span class="eyebrow">EXPERIMENTO EM PAUSA</span><h2>O laboratório espera.</h2><p>Continue quando estiver pronto.</p><button id="resume" class="primary">Continuar →</button></div></section>
+        <section id="victory" class="overlay" hidden><div class="modal-card victory-card"><span class="success-tag">✓ EXPERIMENTO CONCLUÍDO</span><h2>Você programou<br>a saída.</h2><p class="authorship">Esta versão foi modificada por você.</p><div id="receipt" class="receipt"></div><p id="runSummary"></p><button id="replay" class="primary">Jogar com meu código →</button><button id="nextVisitor" class="secondary">Preparar para o próximo visitante</button></div></section>
+        <div id="toast" class="toast" hidden role="status"></div>
+        <div class="game-bottom"><span id="checkpoint">◈ CHECKPOINT ATIVO</span><span id="runTime">00:00</span></div>
+      </div>
+      <div class="play-controls"><div><kbd>←</kbd><kbd>→</kbd><span>ou</span><kbd>A</kbd><kbd>D</kbd> mover <b>·</b> <kbd>ESPAÇO</kbd> pular</div><div><button id="restart">↺ Reiniciar trecho</button><button id="pauseButton" aria-label="Pausar jogo">Ⅱ</button><button id="hint">Preciso de uma dica</button></div></div>
+      <div class="touch-controls" aria-label="Controles de toque"><button data-key="left" aria-label="Andar para a esquerda">◀</button><button data-key="right" aria-label="Andar para a direita">▶</button><button data-key="jump" aria-label="Pular">PULAR ↑</button></div>
+    </section>
+    <aside class="terminal" aria-label="Terminal de programação integrado">
+      <div class="terminal-head"><div><span class="terminal-icon">&gt;_</span><h2>Seu código<span>CONTROLE DO ROBÔ</span></h2></div><span class="connection"><i></i> CONECTADO</span></div>
+      <div class="terminal-instruction"><b>Edite os números.</b> Execute o código.<br>Teste o resultado no laboratório.</div>
+      <div class="file-tab"><span>◈</span> controle.js <span id="dirtyMark" class="dirty-dot" hidden aria-label="Alterações não executadas"></span><small>JAVASCRIPT</small></div>
+      <div class="editor-shell" id="editorShell"><div id="lineNumbers" class="line-numbers" aria-hidden="true"></div><div class="editor-content"><pre id="highlight" aria-hidden="true"></pre><textarea id="code" aria-label="Código do robô. Altere os valores de velocidade, forcaDoPulo e quantidadeDeObstaculos." spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off" wrap="off"></textarea></div></div>
+      <div class="editor-status"><span id="editorState">SALVO NA SIMULAÇÃO</span><span>Ctrl + Enter para executar</span></div>
+      <button id="apply" class="primary run-button"><span>▶</span> Executar código <b>↵</b></button>
+      <div id="feedback" class="feedback" role="status" aria-live="polite"><span class="feedback-icon">›</span><div id="feedbackText">Sistema pronto. Comece jogando para descobrir o que precisa mudar.</div></div>
+      <div class="runtime-title">EM EXECUÇÃO <span>valores aplicados</span></div>
+      <div class="runtime-values"><div id="statSpeed"><span>VELOCIDADE</span><strong id="valueSpeed">5</strong><small>movimento</small></div><div id="statJump"><span>PULO</span><strong id="valueJump">8</strong><small>propulsão</small></div><div id="statObstacles"><span>BARREIRAS</span><strong id="valueObstacles">6</strong><small>percurso</small></div></div>
+      <details class="help"><summary>Como funciona este código?</summary><p>Cada linha atribui um valor a uma variável que o jogo utiliza. Você está programando três parâmetros reais da simulação.</p><p><code>velocidade</code>: de 3 a 12<br><code>forcaDoPulo</code>: de 6 a 20<br><code>quantidadeDeObstaculos</code>: de 0 a 10, sem casas decimais.</p><p>Os nomes precisam permanecer iguais. O botão Executar só aplica o código se as três instruções estiverem corretas.</p></details>
+      <div class="terminal-footer"><span class="tiny-robot">▣</span> Criar. Testar. Entender. Tentar de novo.</div>
+    </aside>
+  </main>
+  <footer class="page-footer"><span>FUGA DO LABORATÓRIO</span><span>VOCÊ MUDA O CÓDIGO. O JOGO RESPONDE.</span><span>PROGRAMAÇÃO <b>×</b> CRIATIVIDADE</span></footer>
+  <script type="module" src="./app.js?v=1"></script>
+</body>
+</html>
