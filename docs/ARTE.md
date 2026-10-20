@@ -23,3 +23,5 @@ Linha 1: quatro fases de corrida. Linha 2: parado, subida, descida e comemoraç�
 ## Composição e efeitos nativos
 
 Interface, realce de sintaxe, partículas, piso, plataformas, feixes, sensor, porta e portal foram implementados em HTML/CSS/Canvas. Sons foram sintetizados com Web Audio. Não há recursos de terceiros baixados de bancos de imagens, trilhas, marcas ou sprites de outros jogos.
+
+Os inimigos e as armas são desenhos nativos em Canvas: drones com propulsores, torres fixas e um guardião ampliado com escudo. Usam carcaças metálicas em gradiente, visor vermelho, miras de ataque, jatos animados, barras de energia e partículas. A paleta de alerta distingue a segurança do robô protagonista sem alterar os PNGs originais.

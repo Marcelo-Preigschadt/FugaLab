@@ -2,9 +2,9 @@
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="theme-color" content="#0b111c"><meta name="description" content="Um laboratório, um robô e três blocos de programação. Modifique a programação dentro do jogo para encontrar a saída.">
+  <meta name="theme-color" content="#0b111c"><meta name="description" content="Um laboratório, um robô e código e novas habilidades. Modifique a programação dentro do jogo para encontrar a saída.">
   <title>FugaLab — A saída está no código</title>
-  <link rel="icon" href="./assets/icon.svg" type="image/svg+xml"><link rel="stylesheet" href="./style.css?v=2">
+  <link rel="icon" href="./assets/icon.svg" type="image/svg+xml"><link rel="stylesheet" href="./style.css?v=3">
 </head>
 <body>
   <header class="topbar">
@@ -15,39 +15,36 @@
   <main class="workspace">
     <section class="play-column" aria-label="Jogo Fuga do Laboratório">
       <div class="mission-heading"><div><span class="eyebrow">SUA MISSÃO <b id="stageNumber">01 / 06</b></span><h1 id="missionTitle">Um salto além do padrão.</h1><p id="missionText">O robô não alcança a plataforma. Altere a força do pulo e ative o núcleo no alto.</p></div><div class="mission-steps" aria-label="Progresso"><span id="step1" class="active">01</span><i></i><span id="step2">02</span><i></i><span id="step3">03</span><i></i><span id="step4">04</span><i></i><span id="step5">05</span><i></i><span id="step6">06</span></div></div>
-      <div class="mission-guide"><div><b>1</b><span id="guideAction">Aumente o número no bloco PULO.</span></div><div><b>2</b><span id="guideTest">Aplique os blocos e teste o salto na plataforma.</span></div></div>
+      <div class="mission-guide"><div><b>1</b><span id="guideAction">Altere forcaDoPulo no código.</span></div><div><b>2</b><span id="guideTest">Execute e teste o salto na plataforma.</span></div></div>
       <div class="game-frame" id="gameFrame">
         <div class="view-label"><span class="record-dot"></span> LABORATÓRIO AO VIVO <span id="roomName">SALA 01 · PROPULSÃO</span></div>
-        <canvas id="game" tabindex="0" aria-label="Use as setas ou A e D para andar e espaço para pular. Ajuste os blocos e clique em Aplicar blocos e testar para mudar o jogo."></canvas>
+        <canvas id="game" tabindex="0" aria-label="Use as setas ou A e D para andar e espaço para pular. J ou X para atirar. Edite o código e clique em Executar código."></canvas>
         <div class="frame-corners" aria-hidden="true"></div>
         <div id="stageToast" class="stage-toast" hidden role="status"><span>ACESSO LIBERADO</span><strong id="stageToastText"></strong></div>
-        <div id="editingBadge" class="editing-badge" hidden>Ⅱ SIMULAÇÃO PAUSADA · AJUSTANDO BLOCOS</div>
-        <section id="intro" class="overlay intro"><div class="intro-card"><span class="eyebrow">UMA EXPERIÊNCIA DE PROGRAMAÇÃO</span><h2>A saída está<br>no <em>código.</em></h2><p>Ajude o robô a escapar.<br>Programe com blocos. Escape de seis salas.</p><button id="start" class="primary">Iniciar experimento <span>→</span></button><div class="intro-controls"><kbd>←</kbd><kbd>→</kbd> mover <span>·</span> <kbd>ESPAÇO</kbd> pular</div></div></section>
+        <div id="editingBadge" class="editing-badge" hidden>Ⅱ SIMULAÇÃO PAUSADA · EDITANDO CÓDIGO</div>
+        <section id="intro" class="overlay intro"><div class="intro-card"><span class="eyebrow">UMA EXPERIÊNCIA DE PROGRAMAÇÃO</span><h2>A saída está<br>no <em>código.</em></h2><p>Ajude o robô a escapar.<br>Escreva código. Crie habilidades.<br>Enfrente a segurança de seis setores.</p><button id="start" class="primary">Iniciar experimento <span>→</span></button><div class="intro-controls"><kbd>←</kbd><kbd>→</kbd> mover <span>·</span> <kbd>ESPAÇO</kbd> pular <b>·</b> <kbd>J</kbd> atirar</div></div></section>
         <section id="pause" class="overlay" hidden><div class="modal-card"><span class="eyebrow">EXPERIMENTO EM PAUSA</span><h2>O laboratório espera.</h2><p>Continue quando estiver pronto.</p><button id="resume" class="primary">Continuar →</button></div></section>
         <section id="victory" class="overlay" hidden><div class="modal-card victory-card"><span class="success-tag">✓ EXPERIMENTO CONCLUÍDO</span><h2>Você programou<br>a saída.</h2><p class="authorship">Esta versão foi modificada por você.</p><div id="receipt" class="receipt"></div><p id="runSummary"></p><button id="replay" class="primary">Jogar com meu código →</button><button id="nextVisitor" class="secondary">Preparar para o próximo visitante</button></div></section>
         <div id="toast" class="toast" hidden role="status"></div>
-        <div class="game-bottom"><span id="checkpoint">◈ CHECKPOINT ATIVO</span><span id="runTime">00:00</span></div>
+        <div class="combat-hud" id="combatHud"><span id="health">● ● ●</span><span id="enemyCount"></span><span id="weaponHud"></span></div><div class="game-bottom"><span id="checkpoint">◈ CHECKPOINT ATIVO</span><span id="runTime">00:00</span></div>
       </div>
-      <div class="play-controls"><div><kbd>←</kbd><kbd>→</kbd><span>ou</span><kbd>A</kbd><kbd>D</kbd> mover <b>·</b> <kbd>ESPAÇO</kbd> pular</div><div><button id="restart">↺ Reiniciar trecho</button><button id="pauseButton" aria-label="Pausar jogo">Ⅱ</button><button id="hint">Preciso de uma dica</button></div></div>
-      <div class="touch-controls" aria-label="Controles de toque"><button data-key="left" aria-label="Andar para a esquerda">◀</button><button data-key="right" aria-label="Andar para a direita">▶</button><button data-key="jump" aria-label="Pular">PULAR ↑</button></div>
+      <div class="play-controls"><div><kbd>←</kbd><kbd>→</kbd><span>ou</span><kbd>A</kbd><kbd>D</kbd> mover <b>·</b> <kbd>ESPAÇO</kbd> pular <b>·</b> <kbd>J</kbd> atirar</div><div><button id="restart">↺ Reiniciar trecho</button><button id="pauseButton" aria-label="Pausar jogo">Ⅱ</button><button id="hint">Preciso de uma dica</button></div></div>
+      <div class="touch-controls" aria-label="Controles de toque"><button data-key="left" aria-label="Andar para a esquerda">◀</button><button data-key="right" aria-label="Andar para a direita">▶</button><button data-key="jump" aria-label="Pular">PULAR ↑</button><button data-key="shoot" aria-label="Atirar">ATIRAR ◉</button></div>
     </section>
-    <aside class="terminal" aria-label="Programação em blocos do robô">
-      <div class="terminal-head"><div><span class="terminal-icon">▰</span><h2>Programe o robô<span>SEU CÓDIGO EM BLOCOS</span></h2></div><span class="connection"><i></i> CONECTADO</span></div>
-      <div class="terminal-instruction"><b id="blockFocusText">Esta sala usa o bloco PULO.</b><br>Troque o número com + / − ou digite.<br>Depois, clique em <strong>Aplicar blocos e testar</strong>.</div>
-      <div class="block-workspace" id="blockWorkspace">
-        <section class="code-block speed-block" id="blockSpeed" data-variable="velocidade"><div class="block-top"><label for="speedInput"><span>01</span> VELOCIDADE</label><span class="block-tag" id="speedTag">TESTE LIVRE</span></div><div class="block-assignment"><span>defina <b>velocidade</b> para</span><div class="number-stepper"><button data-step="-1" data-for="speedInput" aria-label="Diminuir velocidade">−</button><input id="speedInput" type="number" min="0" step="1" value="5" inputmode="decimal" aria-label="Valor do bloco velocidade"><button data-step="1" data-for="speedInput" aria-label="Aumentar velocidade">+</button></div></div><p>Quanto maior o número, mais rápido o robô corre.</p><small id="speedApplied">Em uso: 5</small></section>
-        <section class="code-block jump-block" id="blockJump" data-variable="forcaDoPulo"><div class="block-top"><label for="jumpInput"><span>02</span> PULO</label><span class="block-tag" id="jumpTag">ALTERE AQUI</span></div><div class="block-assignment"><span>defina <b>força do pulo</b> para</span><div class="number-stepper"><button data-step="-1" data-for="jumpInput" aria-label="Diminuir força do pulo">−</button><input id="jumpInput" type="number" min="1" max="30" step="1" value="8" inputmode="decimal" aria-label="Valor do bloco pulo"><button data-step="1" data-for="jumpInput" aria-label="Aumentar força do pulo">+</button></div></div><p>Quanto maior o número, mais alto o robô salta.</p><small id="jumpApplied">Em uso: 8</small></section>
-        <section class="code-block obstacle-block" id="blockObstacles" data-variable="quantidadeDeObstaculos"><div class="block-top"><label for="obstacleInput"><span>03</span> BARREIRAS</label><span class="block-tag" id="obstacleTag">TESTE LIVRE</span></div><div class="block-assignment"><span>defina <b>barreiras</b> para</span><div class="number-stepper"><button data-step="-1" data-for="obstacleInput" aria-label="Diminuir quantidade de barreiras">−</button><input id="obstacleInput" type="number" min="0" max="12" step="1" value="6" inputmode="numeric" aria-label="Valor do bloco barreiras"><button data-step="1" data-for="obstacleInput" aria-label="Aumentar quantidade de barreiras">+</button></div></div><p>Escolha quantos obstáculos aparecem no percurso.</p><small id="obstacleApplied">Em uso: 6</small></section>
-      </div>
-      <div class="editor-status"><span id="editorState">BLOCOS EM EXECUÇÃO</span><span>Enter também aplica</span></div>
-      <button id="apply" class="primary run-button"><span>▶</span> Aplicar blocos e testar <b>↵</b></button>
-      <div id="feedback" class="feedback" role="status" aria-live="polite"><span class="feedback-icon">›</span><div id="feedbackText">Comece jogando. Quando precisar mudar o robô, use os blocos destacados.</div></div>
-      <details class="code-preview"><summary>Ver o código criado pelos blocos</summary><pre id="generatedCode"></pre></details>
-      <details class="help"><summary>O que acontece quando eu aplico?</summary><p>Os números passam a controlar o robô e o percurso. O bloco destacado indica o que esta sala precisa. Você pode experimentar os outros também.</p><p>Na primeira sala, alterar o pulo mantém sua posição. Nas demais, aplicar uma alteração reinicia o trecho para um novo teste. Na última sala, o núcleo carregado fica salvo no checkpoint.</p><p>A velocidade não tem um teto fixo. Pulo: 1 a 30. Barreiras: 0 a 12. Valores altos tornam o robô mais difícil de controlar; tente, observe e ajuste.</p></details>
-      <div class="terminal-footer"><span class="tiny-robot">▣</span> Escolher. Aplicar. Testar. Melhorar.</div>
+    <aside class="terminal" aria-label="Editor de código do robô">
+      <div class="terminal-head"><div><span class="terminal-icon">&gt;_</span><h2>Programe o robô<span>O PODER ESTÁ NO SEU CÓDIGO</span></h2></div><span class="connection"><i></i> CONECTADO</span></div>
+      <div class="terminal-instruction"><b id="lesson">Altere o número depois do sinal =.</b><br>Escreva, execute e veja o robô mudar.</div>
+      <div class="file-tab"><span>JS</span> controle.js <i id="dirtyMark" hidden>●</i></div>
+      <div class="editor-shell"><div class="line-numbers" id="lineNumbers" aria-hidden="true"></div><div class="editor-content"><pre id="highlight" aria-hidden="true"></pre><textarea id="code" spellcheck="false" wrap="off" autocapitalize="off" autocomplete="off" aria-label="Código do robô. Edite os números ou adicione const arma = 1;"></textarea></div></div>
+      <div class="editor-status"><span id="editorState"></span><span>Ctrl + Enter executa</span></div>
+      <button id="apply" class="primary run-button"><span>▶</span> Executar código <b>↵</b></button>
+      <div id="feedback" class="feedback" role="status" aria-live="polite"><span class="feedback-icon">›</span><div id="feedbackText">Comece pelo salto. O código controla as habilidades do robô.</div></div>
+      <div class="runtime-title">VALORES EM EXECUÇÃO</div><div class="runtime-values"><div id="statSpeed"><span>VELOCIDADE</span><strong id="valueSpeed"></strong></div><div id="statJump"><span>PULO</span><strong id="valueJump"></strong></div><div id="statObstacles"><span>BARREIRAS</span><strong id="valueObstacles"></strong></div><div id="statWeapon"><span>ARMA</span><strong id="valueWeapon"></strong></div></div>
+      <details class="help"><summary>Como programar e criar a arma?</summary><p>Cada linha dá um valor a uma variável: <code>const velocidade = 10;</code> faz o robô correr mais rápido. Altere apenas o número e execute para testar.</p><p>Para criar uma habilidade, escreva uma nova linha: <code>const arma = 1;</code>. Segure J ou X para disparar. Arma 0 desliga; 1 é laser; 2 dispara mais rápido; 3 abre três disparos.</p><p>Velocidade não tem teto fixo. Pulo: 1 a 30. Barreiras: 0 a 12. Você pode apagar a linha arma para desativá-la. Erros de escrita indicam a linha e mantêm a última versão funcionando.</p><p>Editar pausa a simulação. Executar reinicia o trecho nas salas 2 a 6, mantendo inimigos derrotados e checkpoints. R reinicia; P pausa.</p></details>
+      <div class="terminal-footer"><span>▣</span> Escrever. Executar. Observar. Melhorar.</div>
     </aside>
   </main>
   <footer class="page-footer"><span>FUGA DO LABORATÓRIO</span><span>VOCÊ MUDA O CÓDIGO. O JOGO RESPONDE.</span><span>PROGRAMAÇÃO <b>×</b> CRIATIVIDADE</span></footer>
-  <script type="module" src="./app.js?v=2"></script>
+  <script type="module" src="./app.js?v=3"></script>
 </body>
 </html>
