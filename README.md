@@ -10,6 +10,10 @@ Para testar localmente, sirva esta pasta com um servidor HTTP, por exemplo `pyth
 
 ## A experiência do visitante
 
+Ao iniciar e entrar em uma nova sala, a simulação pausa e apresenta a alteração de código necessária. O botão **Ir para o código** leva ao editor e seleciona o valor da variável relevante; se a habilidade ainda não existe, posiciona o cursor no final para escrever a nova linha. O visitante executa e testa. A opção **Testar o robô antes** permite experimentar, mantendo um aviso visível que leva ao editor. O painel destaca permanentemente a sequência **editar → executar → jogar**.
+
+Os avisos do cenário usam letras claras sobre placas escuras. O tamanho de texto em Canvas compensa a escala do jogo para manter pelo menos 16 pixels CSS; HUD, orientações e notificações usam tipografia maior para projeção.
+
 O código inicial contém três variáveis:
 
 ```js

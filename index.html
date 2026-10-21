@@ -2,9 +2,9 @@
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="theme-color" content="#0b111c"><meta name="description" content="Um laboratório, um robô e código e novas habilidades. Modifique a programação dentro do jogo para encontrar a saída.">
+  <meta name="theme-color" content="#0b111c"><meta name="description" content="Um laboratório, um robô e novas habilidades criadas com código. Modifique a programação dentro do jogo para encontrar a saída.">
   <title>FugaLab — A saída está no código</title>
-  <link rel="icon" href="./assets/icon.svg" type="image/svg+xml"><link rel="stylesheet" href="./style.css?v=3">
+  <link rel="icon" href="./assets/icon.svg" type="image/svg+xml"><link rel="stylesheet" href="./style.css?v=4">
 </head>
 <body>
   <header class="topbar">
@@ -21,8 +21,18 @@
         <canvas id="game" tabindex="0" aria-label="Use as setas ou A e D para andar e espaço para pular. J ou X para atirar. Edite o código e clique em Executar código."></canvas>
         <div class="frame-corners" aria-hidden="true"></div>
         <div id="stageToast" class="stage-toast" hidden role="status"><span>ACESSO LIBERADO</span><strong id="stageToastText"></strong></div>
+        <section id="codeBrief" class="code-brief" hidden aria-labelledby="briefTitle">
+          <span class="eyebrow">VOCÊ TAMBÉM É O PROGRAMADOR</span>
+          <h2 id="briefTitle">Para avançar, altere o código.</h2>
+          <p>O robô usa os números do editor. Você precisa modificá-los para resolver os desafios.</p>
+          <div class="brief-task" id="briefTask"></div>
+          <div class="brief-flow"><span>1. Edite o código</span><b>→</b><span>2. Execute</span><b>→</b><span>3. Jogue</span></div>
+          <button id="goToCode" class="primary">Ir para o código →</button>
+          <button id="tryFirst" class="brief-secondary">Testar o robô antes</button>
+        </section>
+        <button id="codePrompt" class="code-prompt" hidden><span>⌨</span> <strong>Para avançar, altere o código</strong><b aria-hidden="true">→</b></button>
         <div id="editingBadge" class="editing-badge" hidden>Ⅱ SIMULAÇÃO PAUSADA · EDITANDO CÓDIGO</div>
-        <section id="intro" class="overlay intro"><div class="intro-card"><span class="eyebrow">UMA EXPERIÊNCIA DE PROGRAMAÇÃO</span><h2>A saída está<br>no <em>código.</em></h2><p>Ajude o robô a escapar.<br>Escreva código. Crie habilidades.<br>Enfrente a segurança de seis setores.</p><button id="start" class="primary">Iniciar experimento <span>→</span></button><div class="intro-controls"><kbd>←</kbd><kbd>→</kbd> mover <span>·</span> <kbd>ESPAÇO</kbd> pular <b>·</b> <kbd>J</kbd> atirar</div></div></section>
+        <section id="intro" class="overlay intro"><div class="intro-card"><span class="eyebrow">UMA EXPERIÊNCIA DE PROGRAMAÇÃO</span><h2>A saída está<br>no <em>código.</em></h2><p><strong>Você joga e programa o robô.</strong><br>Altere o código no editor, clique em<br><strong>Executar código</strong> e teste sua solução.</p><button id="start" class="primary">Iniciar experimento <span>→</span></button><div class="intro-controls"><kbd>←</kbd><kbd>→</kbd> mover <span>·</span> <kbd>ESPAÇO</kbd> pular <b>·</b> <kbd>J</kbd> atirar</div></div></section>
         <section id="pause" class="overlay" hidden><div class="modal-card"><span class="eyebrow">EXPERIMENTO EM PAUSA</span><h2>O laboratório espera.</h2><p>Continue quando estiver pronto.</p><button id="resume" class="primary">Continuar →</button></div></section>
         <section id="victory" class="overlay" hidden><div class="modal-card victory-card"><span class="success-tag">✓ EXPERIMENTO CONCLUÍDO</span><h2>Você programou<br>a saída.</h2><p class="authorship">Esta versão foi modificada por você.</p><div id="receipt" class="receipt"></div><p id="runSummary"></p><button id="replay" class="primary">Jogar com meu código →</button><button id="nextVisitor" class="secondary">Preparar para o próximo visitante</button></div></section>
         <div id="toast" class="toast" hidden role="status"></div>
@@ -31,13 +41,14 @@
       <div class="play-controls"><div><kbd>←</kbd><kbd>→</kbd><span>ou</span><kbd>A</kbd><kbd>D</kbd> mover <b>·</b> <kbd>ESPAÇO</kbd> pular <b>·</b> <kbd>J</kbd> atirar</div><div><button id="restart">↺ Reiniciar trecho</button><button id="pauseButton" aria-label="Pausar jogo">Ⅱ</button><button id="hint">Preciso de uma dica</button></div></div>
       <div class="touch-controls" aria-label="Controles de toque"><button data-key="left" aria-label="Andar para a esquerda">◀</button><button data-key="right" aria-label="Andar para a direita">▶</button><button data-key="jump" aria-label="Pular">PULAR ↑</button><button data-key="shoot" aria-label="Atirar">ATIRAR ◉</button></div>
     </section>
-    <aside class="terminal" aria-label="Editor de código do robô">
+    <aside id="terminal" class="terminal" aria-label="Editor de código do robô">
       <div class="terminal-head"><div><span class="terminal-icon">&gt;_</span><h2>Programe o robô<span>O PODER ESTÁ NO SEU CÓDIGO</span></h2></div><span class="connection"><i></i> CONECTADO</span></div>
+      <div class="editor-beacon" id="editorBeacon">1. ALTERE O CÓDIGO AQUI <b>↓</b></div>
       <div class="terminal-instruction"><b id="lesson">Altere o número depois do sinal =.</b><br>Escreva, execute e veja o robô mudar.</div>
       <div class="file-tab"><span>JS</span> controle.js <i id="dirtyMark" hidden>●</i></div>
       <div class="editor-shell"><div class="line-numbers" id="lineNumbers" aria-hidden="true"></div><div class="editor-content"><pre id="highlight" aria-hidden="true"></pre><textarea id="code" spellcheck="false" wrap="off" autocapitalize="off" autocomplete="off" aria-label="Código do robô. Edite os números ou adicione const arma = 1;"></textarea></div></div>
       <div class="editor-status"><span id="editorState"></span><span>Ctrl + Enter executa</span></div>
-      <button id="apply" class="primary run-button"><span>▶</span> Executar código <b>↵</b></button>
+      <button id="apply" class="primary run-button"><span>▶</span> 2. Executar código <b>↵</b></button>
       <div id="feedback" class="feedback" role="status" aria-live="polite"><span class="feedback-icon">›</span><div id="feedbackText">Comece pelo salto. O código controla as habilidades do robô.</div></div>
       <div class="runtime-title">VALORES EM EXECUÇÃO</div><div class="runtime-values"><div id="statSpeed"><span>VELOCIDADE</span><strong id="valueSpeed"></strong></div><div id="statJump"><span>PULO</span><strong id="valueJump"></strong></div><div id="statObstacles"><span>BARREIRAS</span><strong id="valueObstacles"></strong></div><div id="statWeapon"><span>ARMA</span><strong id="valueWeapon"></strong></div></div>
       <details class="help"><summary>Como programar e criar a arma?</summary><p>Cada linha dá um valor a uma variável: <code>const velocidade = 10;</code> faz o robô correr mais rápido. Altere apenas o número e execute para testar.</p><p>Para criar uma habilidade, escreva uma nova linha: <code>const arma = 1;</code>. Segure J ou X para disparar. Arma 0 desliga; 1 é laser; 2 dispara mais rápido; 3 abre três disparos.</p><p>Velocidade não tem teto fixo. Pulo: 1 a 30. Barreiras: 0 a 12. Você pode apagar a linha arma para desativá-la. Erros de escrita indicam a linha e mantêm a última versão funcionando.</p><p>Editar pausa a simulação. Executar reinicia o trecho nas salas 2 a 6, mantendo inimigos derrotados e checkpoints. R reinicia; P pausa.</p></details>
@@ -45,6 +56,6 @@
     </aside>
   </main>
   <footer class="page-footer"><span>FUGA DO LABORATÓRIO</span><span>VOCÊ MUDA O CÓDIGO. O JOGO RESPONDE.</span><span>PROGRAMAÇÃO <b>×</b> CRIATIVIDADE</span></footer>
-  <script type="module" src="./app.js?v=3"></script>
+  <script type="module" src="./app.js?v=4"></script>
 </body>
 </html>

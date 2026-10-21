@@ -1,4 +1,4 @@
-import {VIEW_W,VIEW_H,FLOOR,WORLD_W,clamp} from './logic.js?v=3';
+import {VIEW_W,VIEW_H,FLOOR,WORLD_W,clamp} from './logic.js?v=4';
 const TAU=Math.PI*2;
 export class LabRenderer{
  constructor(canvas){this.canvas=canvas;this.ctx=canvas.getContext('2d');this.background=new Image();this.atlas=new Image();this.frames=[];this.ready=false;this.motes=Array.from({length:45},()=>({x:Math.random()*VIEW_W,y:Math.random()*FLOOR,r:Math.random()*1.2+.4,s:Math.random()*8+3}));}
@@ -17,7 +17,13 @@ export class LabRenderer{
  }
  resize(){const r=this.canvas.getBoundingClientRect(),d=Math.min(devicePixelRatio||1,2);this.canvas.width=Math.round(r.width*d);this.canvas.height=Math.round(r.height*d);}
  rect(x,y,w,h,r=6,fill,stroke){const c=this.ctx;c.beginPath();c.roundRect(x,y,w,h,r);if(fill){c.fillStyle=fill;c.fill();}if(stroke){c.strokeStyle=stroke;c.stroke();}}
- label(text,x,y,color='#b1d8df',size=13,align='center'){const c=this.ctx;c.fillStyle=color;c.font=`600 ${size}px "Segoe UI",sans-serif`;c.textAlign=align;c.textBaseline='alphabetic';c.fillText(text,x,y);}
+ label(text,x,y,color='#f4f9ff',size=18,align='center'){
+  const c=this.ctx;c.save();
+  const fontSize=Math.max(size*1.2,16/(this.cssScale||1));c.font=`750 ${fontSize}px "Segoe UI",sans-serif`;c.textAlign=align;c.textBaseline='alphabetic';
+  const width=c.measureText(text).width,pad=9,left=align==='center'?x-width/2:align==='right'?x-width:x;
+  this.rect(left-pad,y-fontSize-5,width+pad*2,fontSize+13,5,'#061521f2','#7595a6');
+  c.fillStyle=['#bcf46a','#d5f9a8','#7ae5e1'].includes(color)?color:'#f4f9ff';c.fillText(text,x,y);c.restore();
+ }
  glow(color,blur=15){this.ctx.shadowColor=color;this.ctx.shadowBlur=blur;}
  platform(r){
   if(r.h<100){this.rect(r.x,r.y,r.w,r.h,5,'#243d48','#7296a0');this.rect(r.x+5,r.y+5,r.w-10,5,2,'#8db4ba');for(let x=r.x+15;x<r.x+r.w-10;x+=22)this.rect(x,r.y+19,10,r.h-26,2,'#0d2533');return;}
@@ -30,7 +36,7 @@ export class LabRenderer{
   for(let y=r.y+43;y<r.y+r.h-29;y+=13){c.fillStyle='#284855';c.fillRect(r.x+64,y,r.w-128,3);}
   c.strokeStyle='#8ddfdf';c.lineWidth=2;this.glow('#7ae5e1',10);c.beginPath();c.moveTo(r.x+5,r.y+15);c.lineTo(r.x+r.w-5,r.y+15);c.stroke();c.shadowBlur=0;
   for(const [x,y] of [[r.x+8,r.y+8],[r.x+r.w-8,r.y+8],[r.x+8,r.y+r.h-8],[r.x+r.w-8,r.y+r.h-8]]){c.fillStyle='#90aab2';c.beginPath();c.arc(x,y,2,0,TAU);c.fill();}
-  this.label('PROPULSOR · ACESSO SUPERIOR',r.x+r.w/2,r.y+r.h-12,'#6a9eae',8);
+
  }
  core(x,y,time){
   const c=this.ctx;c.save();c.translate(x,y+Math.sin(time*2)*5);const aura=c.createRadialGradient(0,0,2,0,0,70);aura.addColorStop(0,'#bcf46a55');aura.addColorStop(1,'#bcf46a00');c.fillStyle=aura;c.fillRect(-70,-70,140,140);
@@ -96,7 +102,7 @@ export class LabRenderer{
  draw(lab,now,{intro=false,editing=false}={}){
   const c=this.ctx,cw=this.canvas.width,ch=this.canvas.height;if(!cw||!ch)return;
   c.setTransform(1,0,0,1,0,0);c.fillStyle='#091623';c.fillRect(0,0,cw,ch);
-  const scale=Math.max(cw/VIEW_W,ch/VIEW_H),viewportWidth=cw/scale,ox=0,oy=(ch-VIEW_H*scale)/2;c.setTransform(scale,0,0,scale,ox,oy);c.save();c.beginPath();c.rect(0,0,VIEW_W,VIEW_H);c.clip();
+  const scale=Math.max(cw/VIEW_W,ch/VIEW_H),viewportWidth=cw/scale,ox=0,oy=(ch-VIEW_H*scale)/2;this.cssScale=scale/(cw/this.canvas.clientWidth);c.setTransform(scale,0,0,scale,ox,oy);c.save();c.beginPath();c.rect(0,0,VIEW_W,VIEW_H);c.clip();
   const time=now/1000,dt=Math.min(.05,Math.max(0,(now-(this.lastTime||now))/1000));this.lastTime=now;if(this.lastStage!==lab.stage){this.camera=0;this.lastStage=lab.stage;}const wanted=clamp(lab.player.x-viewportWidth*.35,0,lab.worldWidth-viewportWidth);this.camera=(this.camera||0)+(wanted-(this.camera||0))*(1-Math.exp(-dt*8));const camera=intro?0:this.camera;
   if(this.ready){const bx=-((20+camera*.12)%1280);c.drawImage(this.background,bx,0,1280,720);c.drawImage(this.background,bx+1280,0,1280,720);}
   else{c.fillStyle='#132c3b';c.fillRect(0,0,VIEW_W,VIEW_H);}
@@ -110,14 +116,14 @@ export class LabRenderer{
   if(!intro){
    const level=lab.level;
    if(lab.stage>=4){c.save();c.globalAlpha=.06;c.fillStyle=['#ffb876','#ad85ff','#bcf46a'][lab.stage-4];c.fillRect(camera,0,VIEW_W,VIEW_H);c.restore();}
-   if(level.gap){const [start,end]=level.gap;c.fillStyle='#030c16';c.fillRect(start,FLOOR-3,end-start,VIEW_H-FLOOR+3);const depth=c.createLinearGradient(start,FLOOR,end,VIEW_H);depth.addColorStop(0,'#28394b');depth.addColorStop(.2,'#050e1b');depth.addColorStop(.8,'#050e1b');depth.addColorStop(1,'#28394b');c.fillStyle=depth;c.fillRect(start+4,FLOOR+6,end-start-8,VIEW_H-FLOOR);this.label('VÃO · COMBINE VELOCIDADE E PULO',(start+end)/2,FLOOR+60,'#ffc99f',11);c.fillStyle='#ffb876';for(const edge of [start-8,end])c.fillRect(edge,FLOOR-4,8,14);}
-   if(level.platform){this.platform(level.platform);if(!lab.reactorCharged)this.core(level.core.x,level.core.y,time);else this.label('✓ NÚCLEO CARREGADO',level.core.x,level.core.y,'#bcf46a',15);this.label(lab.stage===4?'SALTO COMBINADO':lab.stage===6?'REATOR CENTRAL':'PLATAFORMA ELEVADA',level.core.x,level.core.y-63,'#b7d4dc',11);}
+   if(level.gap){const [start,end]=level.gap;c.fillStyle='#030c16';c.fillRect(start,FLOOR-3,end-start,VIEW_H-FLOOR+3);const depth=c.createLinearGradient(start,FLOOR,end,VIEW_H);depth.addColorStop(0,'#28394b');depth.addColorStop(.2,'#050e1b');depth.addColorStop(.8,'#050e1b');depth.addColorStop(1,'#28394b');c.fillStyle=depth;c.fillRect(start+4,FLOOR+6,end-start-8,VIEW_H-FLOOR);this.label('VÃO · CORRA E PULE',(start+end)/2,FLOOR+60,'#ffc99f',11);c.fillStyle='#ffb876';for(const edge of [start-8,end])c.fillRect(edge,FLOOR-4,8,14);}
+   if(level.platform){this.platform(level.platform);if(!lab.reactorCharged)this.core(level.core.x,level.core.y,time);else this.label('✓ NÚCLEO CARREGADO',level.core.x,level.core.y,'#bcf46a',15);}
    for(const cover of level.covers||[])this.platform(cover);
    if(level.gateX)this.gate(lab,time);
    for(const [i,h] of lab.hazards.entries())this.hazard(h,time,i);
    if(level.portal)this.portal(level.exitX+30,FLOOR-72,time,lab.enemiesLeft>0||(level.maxBarriers!==undefined&&lab.config.quantidadeDeObstaculos>level.maxBarriers)||(lab.stage===6&&!lab.reactorCharged),lab.stage===3?'PORTAL DE TRANSFERÊNCIA':'PORTAL DE SAÍDA');
-   if(level.hazardStart!==undefined)this.label(`${lab.config.quantidadeDeObstaculos} BARREIRAS · MÁXIMO ${level.maxBarriers}`,(level.hazardStart+level.hazardEnd)/2,165,'#ffb4bf',14);
-   if(lab.stage<3){this.rect(120,345,210,65,8,'#0d2936cc','#3d7180');this.label(lab.stage===1?'EDITE forcaDoPulo':'CRIE const arma = 1;',225,369,'#94bdca',10);this.label(lab.stage===1?`PULO: ${lab.config.forcaDoPulo}`:`ARMA: ${lab.config.arma}`,225,395,'#bcf46a',19);}
+   if(level.hazardStart!==undefined)this.label(`BARREIRAS: ${lab.config.quantidadeDeObstaculos} / MÁX. ${level.maxBarriers}`,(level.hazardStart+level.hazardEnd)/2,165,'#ffb4bf',14);
+
   }
   if(!intro){
    for(const e of lab.enemies)if(e.hp>0)this.enemy(e,lab,time);

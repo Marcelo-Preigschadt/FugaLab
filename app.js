@@ -1,15 +1,18 @@
-import {Laboratory,DEFAULT_CODE,DEFAULT_CONFIG,MISSIONS,parseCode,formatCode} from './logic.js?v=3';
-import {LabRenderer} from './render.js?v=3';
+import {Laboratory,DEFAULT_CODE,DEFAULT_CONFIG,MISSIONS,parseCode,formatCode} from './logic.js?v=4';
+import {LabRenderer} from './render.js?v=4';
 const $=id=>document.getElementById(id),canvas=$('game'),editor=$('code');
 const renderer=new LabRenderer(canvas);
 let lab=new Laboratory(),mode='intro',loaded=false,lastApplied=DEFAULT_CODE,keys={left:false,right:false,jump:false};
 let lastTime=performance.now(),accumulator=0,toastTime=0,stageTime=0,sound=false,audio=null;
+let taughtStage=0;
+const stageVariables=['forcaDoPulo','arma','quantidadeDeObstaculos','velocidade','velocidade','forcaDoPulo'];
 const labels={velocidade:'Velocidade',forcaDoPulo:'Força do pulo',quantidadeDeObstaculos:'Barreiras',arma:'Arma'};
 function show(id,on){$(id).hidden=!on;}
 function notify(text,seconds=4){$('toast').textContent=text;toastTime=seconds;show('toast',true);}
 function feedback(text,type=''){ $('feedbackText').textContent=text;$('feedback').className='feedback'+(type?' '+type:'');}
 function setMode(next){
  mode=next;held.clear();keys={left:false,right:false,jump:false};accumulator=0;
+ show('codeBrief',next==='briefing');show('codePrompt',!['intro','briefing','editing','won'].includes(next)&&taughtStage!==lab.stage);
  show('intro',next==='intro');show('pause',next==='paused');show('victory',next==='won');show('editingBadge',next==='editing');
  document.body.classList.toggle('editor-focused',next==='editing');document.body.classList.toggle('game-paused',next==='paused');
  $('pauseButton').textContent=next==='paused'||next==='editing'?'▶':'Ⅱ';$('pauseButton').setAttribute('aria-label',next==='paused'||next==='editing'?'Continuar jogo':'Pausar jogo');
@@ -46,12 +49,24 @@ function tone(type){
  if(['shoot','damage','enemyDown','noWeapon'].includes(type)&&type!=='shoot')type='hit';sounds.shoot=[680,220,.055,.015];
  const [a,b,duration,volume]=sounds[type]||sounds.apply,now=audio.currentTime,osc=audio.createOscillator(),gain=audio.createGain();osc.type=type==='hit'?'sawtooth':'triangle';osc.frequency.setValueAtTime(a,now);osc.frequency.exponentialRampToValueAtTime(b,now+duration);gain.gain.setValueAtTime(volume,now);gain.gain.exponentialRampToValueAtTime(.001,now+duration);osc.connect(gain);gain.connect(audio.destination);osc.start();osc.stop(now+duration+.02);
 }
-function begin(){if(!loaded)return;setMode('playing');canvas.focus();feedback('Experimento iniciado. Tente alcançar o núcleo. Se não conseguir, clique no código e altere a força do pulo.');}
+function presentCode(){
+ stageTime=0;show('stageToast',false);const info=MISSIONS[lab.stage-1];$('briefTask').textContent=info.action;$('terminal').classList.add('needs-code');
+ $('editorBeacon').textContent='1. ALTERE O CÓDIGO AQUI ↓';setMode('briefing');$('goToCode').focus({preventScroll:true});
+}
+function focusCode(){
+ setMode('editing');$('terminal').scrollIntoView({behavior:'smooth',block:'nearest'});editor.focus({preventScroll:true});
+ const variable=stageVariables[lab.stage-1],pattern=new RegExp('(?:const|let)\\s+'+variable+'\\s*=\\s*(-?[0-9.]+)'),match=pattern.exec(editor.value);
+ if(match){const start=match.index+match[0].lastIndexOf(match[1]);editor.setSelectionRange(start,start+match[1].length);editor.scrollTop=Math.max(0,editor.value.slice(0,start).split('\n').length-3)*26;}
+ else {editor.setSelectionRange(editor.value.length,editor.value.length);editor.scrollTop=editor.scrollHeight;}
+ feedback(MISSIONS[lab.stage-1].action+' Depois clique em 2. Executar código.');highlight();
+}
+function begin(){if(!loaded)return;presentCode();}
 function applyCode(){
  if(!loaded)return;
  const result=parseCode(editor.value);
  if(!result.ok){highlight(result.line);feedback(result.error+' O jogo mantém os valores anteriores.','error');if(mode==='playing')setMode('editing');tone('hit');return;}
  if(lab.won){lab=new Laboratory(lab.config);mission();}
+ taughtStage=lab.stage;$('terminal').classList.remove('needs-code');$('editorBeacon').textContent='1. EDITE → 2. EXECUTE → 3. JOGUE';
  stageTime=0;show('stageToast',false);const before={...lab.config},changed=lab.apply(result.config);if(lab.player.x===110)renderer.camera=0;lastApplied=editor.value;highlight();values(changed);
  const detail=changed.map(k=>`${labels[k]}: ${before[k]} → ${result.config[k]}`).join(' · ');
  feedback(changed.length?`Código aplicado. ${detail}. Teste o resultado no laboratório.`:'Código correto. Os valores já estavam em execução.','success');
@@ -59,8 +74,8 @@ function applyCode(){
 }
 function restart(){if(mode==='intro'||mode==='won')return;lab.restart();renderer.camera=0;setMode('playing');canvas.focus();notify('Trecho reiniciado. Seu código foi mantido.');}
 function togglePause(){if(mode==='playing'){setMode('paused');}else if(mode==='paused'||mode==='editing'){setMode('playing');canvas.focus();}}
-function fresh(){lab=new Laboratory();renderer.camera=0;editor.value=DEFAULT_CODE;lastApplied=DEFAULT_CODE;toastTime=0;stageTime=0;show('toast',false);show('stageToast',false);values();mission();highlight();setMode('intro');feedback('Novo visitante. Comece jogando e descubra o que precisa mudar.');}
-function replay(){const config={...lab.config},edits=lab.edits;lab=new Laboratory(config);renderer.camera=0;lab.edits=edits;editor.value=formatCode(config);lastApplied=editor.value;highlight();values();mission();begin();notify('Sua versão está em execução. As seis salas usam os valores que você programou.');}
+function fresh(){taughtStage=0;$('terminal').classList.remove('needs-code');lab=new Laboratory();renderer.camera=0;editor.value=DEFAULT_CODE;lastApplied=DEFAULT_CODE;toastTime=0;stageTime=0;show('toast',false);show('stageToast',false);values();mission();highlight();setMode('intro');feedback('Novo visitante. Comece jogando e descubra o que precisa mudar.');}
+function replay(){const config={...lab.config},edits=lab.edits;lab=new Laboratory(config);renderer.camera=0;taughtStage=0;lab.edits=edits;editor.value=formatCode(config);lastApplied=editor.value;highlight();values();mission();begin();notify('Sua versão está em execução. As seis salas usam os valores que você programou.');}
 function victory(){
  setMode('won');const receipt=$('receipt');receipt.replaceChildren();
  for(const [key,label] of [['velocidade','VELOCIDADE'],['forcaDoPulo','PULO'],['quantidadeDeObstaculos','BARREIRAS'],['arma','ARMA']]){const card=document.createElement('div'),name=document.createElement('span'),value=document.createElement('strong');name.textContent=label;value.textContent=lab.config[key];card.append(name,value);receipt.append(card);}
@@ -70,7 +85,7 @@ function victory(){
 function processEvents(){
  for(const event of lab.events){
   tone(event.type);
-  if(event.type==='stage'){mission();renderer.camera=0;stageTime=3;$('stageToastText').textContent=MISSIONS[lab.stage-1].room;show('stageToast',true);feedback(MISSIONS[lab.stage-1].action,'success');}
+  if(event.type==='stage'){mission();renderer.camera=0;stageTime=3;$('stageToastText').textContent=MISSIONS[lab.stage-1].room;show('stageToast',true);feedback(MISSIONS[lab.stage-1].action,'success');presentCode();}
   if(event.type==='gateOpen')notify('Porta aberta. Corra até a saída!',2);
   if(event.type==='gateClosed')notify('A porta fechou. Ajuste a velocidade e execute: o trecho recomeça para o novo teste.',5);
   if(event.type==='hit'){renderer.camera=0;}
@@ -89,7 +104,7 @@ function frame(now){
  const dt=Math.min(.05,(now-lastTime)/1000);lastTime=now;
  if(mode==='playing'){
   accumulator+=dt;
-  while(accumulator>=1/120&&mode==='playing'){lab.step(1/120,keys);processEvents();accumulator-=1/120;}
+  while(accumulator>=1/120&&mode==='playing'){lab.step(1/120,keys);processEvents();accumulator=Math.max(0,accumulator-1/120);}
  }
  toastTime=Math.max(0,toastTime-dt);stageTime=Math.max(0,stageTime-dt);if(!toastTime)show('toast',false);if(!stageTime)show('stageToast',false);
  $('health').textContent='● '.repeat(lab.health)+'○ '.repeat(3-lab.health);$('enemyCount').textContent=lab.enemiesLeft?`${lab.enemiesLeft} ${lab.enemiesLeft===1?'DEFENSOR':'DEFENSORES'}`:lab.stage>1?'SETOR LIMPO':'';$('weaponHud').textContent=lab.config.arma?`ARMA ${lab.config.arma} · J / X`:'ARMA OFF · PROGRAME';
@@ -99,6 +114,7 @@ function frame(now){
 editor.value=DEFAULT_CODE;highlight();mission();values();renderer.resize();
 $('start').disabled=true;$('start').textContent='Preparando laboratório…';$('apply').disabled=true;
 renderer.load().then(()=>{loaded=true;$('start').disabled=false;$('start').replaceChildren(document.createTextNode('Iniciar experimento →'));$('apply').disabled=false;}).catch(error=>{console.error(error);$('start').textContent='Arte não carregada';feedback('Não foi possível carregar a arte do jogo. Atualize a página. Verifique se a pasta assets foi publicada por completo.','error');});
+$('goToCode').addEventListener('click',focusCode);$('codePrompt').addEventListener('click',focusCode);$('tryFirst').addEventListener('click',()=>{setMode('playing');canvas.focus();feedback('Teste o robô. Para mudar suas habilidades, clique em Alterar o código.');});
 $('start').addEventListener('click',begin);$('apply').addEventListener('click',applyCode);$('restart').addEventListener('click',restart);$('pauseButton').addEventListener('click',togglePause);$('resume').addEventListener('click',togglePause);$('newVisitor').addEventListener('click',fresh);$('nextVisitor').addEventListener('click',fresh);$('replay').addEventListener('click',replay);
 $('hint').addEventListener('click',()=>{feedback(MISSIONS[lab.stage-1].hint);notify(MISSIONS[lab.stage-1].hint,7);if(mode==='playing')canvas.focus();});
 editor.addEventListener('input',()=>highlight());editor.addEventListener('scroll',syncScroll);editor.addEventListener('focus',()=>{if(mode==='playing')setMode('editing');});
