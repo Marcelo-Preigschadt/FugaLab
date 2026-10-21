@@ -1,4 +1,4 @@
-import {VIEW_W,VIEW_H,FLOOR,WORLD_W,clamp} from './logic.js?v=4';
+import {VIEW_W,VIEW_H,FLOOR,WORLD_W,clamp} from './logic.js?v=5';
 const TAU=Math.PI*2;
 export class LabRenderer{
  constructor(canvas){this.canvas=canvas;this.ctx=canvas.getContext('2d');this.background=new Image();this.atlas=new Image();this.frames=[];this.ready=false;this.motes=Array.from({length:45},()=>({x:Math.random()*VIEW_W,y:Math.random()*FLOOR,r:Math.random()*1.2+.4,s:Math.random()*8+3}));}
@@ -20,7 +20,10 @@ export class LabRenderer{
  label(text,x,y,color='#f4f9ff',size=18,align='center'){
   const c=this.ctx;c.save();
   const fontSize=Math.max(size*1.2,16/(this.cssScale||1));c.font=`750 ${fontSize}px "Segoe UI",sans-serif`;c.textAlign=align;c.textBaseline='alphabetic';
-  const width=c.measureText(text).width,pad=9,left=align==='center'?x-width/2:align==='right'?x-width:x;
+  const width=c.measureText(text).width,pad=9;let left=align==='center'?x-width/2:align==='right'?x-width:x;
+  const m=c.getTransform(),anchor=m.a*x+m.e,edge=8*(this.canvas.width/this.canvas.clientWidth);
+  if(anchor<0||anchor>this.canvas.width){c.restore();return;}
+  if(m.a>0){const screenLeft=m.a*(left-pad)+m.e,screenRight=m.a*(left+width+pad)+m.e;const shift=screenLeft<edge?(edge-screenLeft)/m.a:screenRight>this.canvas.width-edge?(this.canvas.width-edge-screenRight)/m.a:0;x+=shift;left+=shift;}
   this.rect(left-pad,y-fontSize-5,width+pad*2,fontSize+13,5,'#061521f2','#7595a6');
   c.fillStyle=['#bcf46a','#d5f9a8','#7ae5e1'].includes(color)?color:'#f4f9ff';c.fillText(text,x,y);c.restore();
  }

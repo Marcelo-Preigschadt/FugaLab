@@ -10,7 +10,9 @@ Para testar localmente, sirva esta pasta com um servidor HTTP, por exemplo `pyth
 
 ## A experiência do visitante
 
-Ao iniciar e entrar em uma nova sala, a simulação pausa e apresenta a alteração de código necessária. O botão **Ir para o código** leva ao editor e seleciona o valor da variável relevante; se a habilidade ainda não existe, posiciona o cursor no final para escrever a nova linha. O visitante executa e testa. A opção **Testar o robô antes** permite experimentar, mantendo um aviso visível que leva ao editor. O painel destaca permanentemente a sequência **editar → executar → jogar**.
+O visitante começa jogando, sem tutorial obrigatório e sem uma pausa ao entrar nas salas. As instruções que antecipavam a solução foram retiradas. Ao falhar em um salto, ficar bloqueado na plataforma, encontrar drones sem arma, atingir lasers ou perder o tempo da porta, recebe uma dica contextual sem interromper o controle. A dica destaca o editor; o botão **Editar código** permite ir até ele voluntariamente. **Preciso de uma dica** continua disponível para solicitar a solução sugerida.
+
+O som vem ligado. O primeiro clique desbloqueia o Web Audio do navegador; o botão de som permite silenciar e religar. Novo visitante e troca de sala preservam a preferência de áudio.
 
 Os avisos do cenário usam letras claras sobre placas escuras. O tamanho de texto em Canvas compensa a escala do jogo para manter pelo menos 16 pixels CSS; HUD, orientações e notificações usam tipografia maior para projeção.
 
